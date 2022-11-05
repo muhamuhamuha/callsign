@@ -15,11 +15,11 @@ It aspires to be as simple as possible.
 Installation
 ************
 
-Or, add this to a `requirements.txt` file::
+Or, add this to a "requirements.txt" file::
 
 > git+git://github.com/muhamuhamuha/decospectors.git@main#egg=decospectors
 
-and now run `pip install -r requirements.txt`
+and now run:: pip install -r requirements.txt
 
 *******
 Impetus
@@ -30,18 +30,22 @@ Usage
 *****
 
 
-*******
 Recipes
-*******
+```````
 
-#### Basic
+Basic
+`````
 
-####
 
-#### Build a rudimentary type checker
+Build a rudimentary type checker
+````````````````````````````````
 
-## Contribute
+**********
+Contribute
+**********
 
-## Chagelog
+********
+Chagelog
+********
 
 
