@@ -23,7 +23,7 @@
 'hi'
 >>> params['x'].annotation
 inspect._empty
->>> callsign.is_paramattr_empty(params['x'].annotation)
+>>> callsign.isempty(params['x'].annotation)
 True
 
 """
@@ -49,7 +49,9 @@ class Paramattr(NamedTuple):
     +============+================+===========================================+
     | name       | str            | The parameter name                        |
     +------------+----------------+-------------------------------------------+
-    | value      | Any            | The parameter's value                     |
+    | value      | Any            | The parameter's value; NOTE this could be |
+    |            |                | the parameter's default value (in which   |
+    |            |                | case, the Attribute passed will be False) |
     +------------+----------------+-------------------------------------------+
     | default    | Any or         | If a default value was given, it will be  |
     |            | inspect._empty | assigned here; otherwise it's             |
@@ -63,6 +65,11 @@ class Paramattr(NamedTuple):
     |            |                |   - KEYWORD_ONLY                          |
     |            |                |   - VULNERABLE_DEFAULT                    |
     +------------+----------------+-------------------------------------------+
+    | defaulted  | bool           | Flag that is False if a value was passed  |
+    |            |                | to the parameter, and True if no value    |
+    |            |                | was given (in which case the default is   |
+    |            |                | being used)                               |
+    +------------+----------------+-------------------------------------------+
     | annotation | Any or         | If the function's parameters have type    |
     |            | inspect._empty | hints they are included here; otherwise   |
     |            |                | it's inspect._empty                       |
@@ -72,6 +79,7 @@ class Paramattr(NamedTuple):
     value: Any
     default: Any | inspect._empty
     kind: ParamKinds
+    defaulted: bool
     annotation: Any | inspect._empty
 
 
@@ -79,6 +87,7 @@ def _create_paramattrs(bargs: inspect.BoundArguments,
                        params: dict[str, inspect.Parameter]
                        ) -> dict[str, Paramattr]:
 
+    # gather all the kinds of parameters that were passed to the function
     kinds = (params[pname].kind.name for pname in params)
 
     paramattrs = dict()
@@ -87,19 +96,20 @@ def _create_paramattrs(bargs: inspect.BoundArguments,
 
         value = bargs.arguments.get(pname, pobj.default)
         default = pobj.default
+        kind = ParamKinds(pobj.kind.name)
+        defaulted = bargs.arguments.get(pname, inspect._empty) is inspect._empty
         annotation = pobj.annotation or inspect._empty
 
         # find any VULNERABLE_DEFAULT(s)
         if (ParamKinds.VAR_POSITIONAL in kinds
-            and pobj.kind.name == ParamKinds.POSITIONAL_OR_KEYWORD
+            and kind == ParamKinds.POSITIONAL_OR_KEYWORD
             and value != default
             and default is not inspect._empty):
+
             kind = ParamKinds.VULNERABLE_DEFAULT
 
-        else:
-            kind = ParamKinds(pobj.kind.name)
-
-        paramattrs[pname] = Paramattr(pname, value, default, kind, annotation)
+        paramattrs[pname] = Paramattr(pname, value, default, kind, defaulted,
+                                      annotation)
 
     return paramattrs
 
@@ -118,27 +128,20 @@ class CallSign(ModuleType):
 
         sig = inspect.signature(fn)
         bargs = sig.bind_partial(*args, **kwargs)
-        bargs.apply_defaults()
+        # don't use bargs.apply_defaults, we will apply manually
 
         paramattrs = _create_paramattrs(bargs, sig.parameters)
         return paramattrs
 
-    def reset_vulnerable_defaults(self,
-                                  fn: Callable,
-                                  *args: Any,
-                                  **kwargs: Any,
-                                 ) -> dict[str, Paramattr]:
-        paramattrs = self.__call__(fn, *args, **kwargs)
-        return paramattrs
-
     @staticmethod
-    def is_paramattr_empty(whatever: Any) -> bool:
+    def isempty(whatever: Any) -> bool:
         """
         >>> import inspect, callsign
         >>> callsign.isempty(inspect._empty)
         True
         """
         return whatever is inspect._empty
+
 
 sys.modules[__name__] = CallSign()
 
