@@ -2,39 +2,18 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
 
-<style>
 
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
-
-.orbitron-title {
-  font-family: "Orbitron", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
-}
-
-.side-by-side {
-  display: flex;
-}
-
-.image-stuff {
-  border-radius: 25px;
-  width: 125px;
-  height: 125px;
-  margin-right: 15px;
-}
-
-</style>
-
-<div class="side-by-side">
-  <img src="imgs/mainlogo.png" class="image-stuff"/>
-  <h1 class="orbitron-title">callsign: simplified introspection</h1>
+<div style="display: flex;">
+  <img src="imgs/mainlogo.png" style="border-radius: 25px; width: 125px; height: 125px; margin-right: 15px;"/>
+  <h1 style="font-family: Orbitron, sans-serif; font-optical-sizing: auto; font-weight: 400; font-style: normal;">
+    callsign: simplified introspection
+  </h1>
 </div>
 <br>
 
 
-callsign; a python package that abstracts away boilerplate from the  standard
-library's inspect module. Made for practitioners of DDD 
+This is a python package that abstracts away boilerplate from the standard
+library's inspect module. Used by practitioners of DDD 
 (decorator driven development); minimizing tedium and keeping things
 DRY is what we're all about.
 
@@ -167,7 +146,7 @@ a type hint
 ### ParamKinds
 
 These are taken from the standard library's inspect module, but we've added one:
-`ParamKinds.VULNERABLE_DEFAULT`. 
+`ParamKinds.VULNERABLE_DEFAULT` to handle one of python's hidden gotchas. 
 
 VULNERABLE\_DEFAULT is interchangeable with POSITIONAL\_OR\_KEYWORD; but also,
 it is a parameter that was given a default value, and that default
